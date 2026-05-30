@@ -1082,35 +1082,51 @@ const DEMO = {
 }
 /* ─── AUTH ────────────────────────────────────────────────────────────── */
 window.onload = function() {
-  // Try to restore session
-  const saved = localStorage.getItem('zdj_user');
-  if (saved) {
-    state.user = JSON.parse(saved);
-    showApp();
-  } else {
-    // Initialize Google Sign-In button
-    if (typeof google !== 'undefined') {
+  // Clear any stale session — always start fresh on GitHub Pages
+  localStorage.removeItem('zdj_user');
+
+  // Initialize Google Sign-In once library is ready
+  function initGSI() {
+    if (typeof google !== 'undefined' && google.accounts) {
       google.accounts.id.initialize({
         client_id: GOOGLE_CLIENT_ID,
         callback: handleCredentialResponse,
       });
-      google.accounts.id.renderButton(
-        document.getElementById('g_id_signin'),
-        { theme:'filled_blue', size:'large', width:300 }
-      );
     }
   }
+  // Try immediately, then retry after short delay in case script is still loading
+  initGSI();
+  setTimeout(initGSI, 1500);
 };
 
 function handleGoogleSignIn() {
   if (GOOGLE_CLIENT_ID === 'YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com') {
-    // Demo fallback when Client ID not configured
     loadDemo();
     return;
   }
-  if (typeof google !== 'undefined') {
-    google.accounts.id.prompt();
+  if (typeof google === 'undefined' || !google.accounts) {
+    alert('Google Sign-In is still loading. Please wait a moment and try again.');
+    return;
   }
+  // Use OAuth2 token flow — opens a popup reliably
+  const client = google.accounts.oauth2.initTokenClient({
+    client_id: GOOGLE_CLIENT_ID,
+    scope: 'https://www.googleapis.com/auth/spreadsheets.readonly profile email',
+    callback: (tokenResponse) => {
+      if (tokenResponse.error) return;
+      state.accessToken = tokenResponse.access_token;
+      // Fetch user profile
+      fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+        headers: { Authorization: 'Bearer ' + tokenResponse.access_token }
+      })
+      .then(r => r.json())
+      .then(profile => {
+        state.user = { name: profile.name, email: profile.email, picture: profile.picture };
+        showApp();
+      });
+    },
+  });
+  client.requestAccessToken();
 }
 
 function handleCredentialResponse(response) {
