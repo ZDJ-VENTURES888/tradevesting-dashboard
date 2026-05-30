@@ -1,0 +1,1608 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ZDJ Ventures | TradeVesting Dashboard 2026</title>
+
+  <!-- Google Sign-In -->
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <!-- Google API Client -->
+  <script src="https://apis.google.com/js/api.js"></script>
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+  <style>
+    /* ── Reset & Fonts ─────────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+    :root {
+      --navy:   #0A1628;
+      --navy2:  #0D1F3C;
+      --teal:   #00B4D8;
+      --teal2:  #0077B6;
+      --gold:   #FFD700;
+      --gold2:  #B8860B;
+      --green:  #00C853;
+      --green2: #1B5E20;
+      --red:    #FF3D00;
+      --gray1:  #F2F4F7;
+      --gray2:  #E5E7EB;
+      --gray3:  #6B7280;
+      --white:  #FFFFFF;
+      --card-bg:#0F2440;
+      --border: rgba(255,255,255,0.08);
+      --shadow: 0 4px 24px rgba(0,0,0,0.4);
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--navy);
+      color: var(--white);
+      min-height: 100vh;
+    }
+
+    /* ── Auth Screen ────────────────────────────────────────────────── */
+    #auth-screen {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      background: linear-gradient(135deg, #0A1628 0%, #0D2B4E 60%, #051020 100%);
+    }
+    .auth-logo {
+      font-size: 2.8rem;
+      font-weight: 800;
+      color: var(--gold);
+      letter-spacing: -1px;
+      margin-bottom: 8px;
+    }
+    .auth-sub {
+      color: rgba(255,255,255,0.5);
+      font-size: 0.9rem;
+      margin-bottom: 48px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+    }
+    .auth-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 48px;
+      max-width: 420px;
+      width: 90%;
+      text-align: center;
+      box-shadow: var(--shadow);
+    }
+    .auth-card h2 {
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin-bottom: 12px;
+    }
+    .auth-card p {
+      color: rgba(255,255,255,0.55);
+      font-size: 0.875rem;
+      margin-bottom: 32px;
+      line-height: 1.6;
+    }
+    .google-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      background: white;
+      color: #333;
+      border: none;
+      border-radius: 10px;
+      padding: 14px 24px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      width: 100%;
+      transition: all 0.2s;
+    }
+    .google-btn:hover { transform: translateY(-1px); box-shadow: 0 8px 20px rgba(0,0,0,0.3); }
+    .google-btn img { width: 20px; }
+    .demo-btn {
+      margin-top: 12px;
+      background: transparent;
+      border: 1px solid rgba(255,255,255,0.2);
+      color: rgba(255,255,255,0.7);
+      border-radius: 10px;
+      padding: 12px 24px;
+      font-size: 0.875rem;
+      cursor: pointer;
+      width: 100%;
+      transition: all 0.2s;
+    }
+    .demo-btn:hover { background: rgba(255,255,255,0.05); }
+    #g_id_signin { display: none; }
+
+    /* ── App Shell ──────────────────────────────────────────────────── */
+    #app { display: none; }
+
+    /* ── Header ─────────────────────────────────────────────────────── */
+    .header {
+      background: var(--navy2);
+      border-bottom: 1px solid var(--border);
+      padding: 0 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 64px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .header-brand {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .header-logo {
+      font-size: 1.3rem;
+      font-weight: 800;
+      color: var(--gold);
+    }
+    .header-divider { width: 1px; height: 24px; background: var(--border); }
+    .header-title {
+      font-size: 0.85rem;
+      color: rgba(255,255,255,0.5);
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .live-badge {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(0,200,83,0.12);
+      border: 1px solid rgba(0,200,83,0.3);
+      color: var(--green);
+      font-size: 0.72rem;
+      font-weight: 600;
+      padding: 4px 10px;
+      border-radius: 20px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    .live-dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--green);
+      animation: pulse 1.5s infinite;
+    }
+    @keyframes pulse {
+      0%,100% { opacity: 1; } 50% { opacity: 0.3; }
+    }
+    .user-avatar {
+      width: 34px; height: 34px;
+      border-radius: 50%;
+      border: 2px solid var(--teal);
+      cursor: pointer;
+      background: var(--teal2);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.8rem; font-weight: 700;
+      overflow: hidden;
+    }
+    .user-avatar img { width: 100%; border-radius: 50%; }
+    .signout-btn {
+      background: transparent;
+      border: 1px solid rgba(255,255,255,0.15);
+      color: rgba(255,255,255,0.6);
+      border-radius: 8px;
+      padding: 6px 14px;
+      font-size: 0.8rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .signout-btn:hover { background: rgba(255,255,255,0.05); color: white; }
+    .last-updated {
+      font-size: 0.72rem;
+      color: rgba(255,255,255,0.35);
+    }
+
+    /* ── Navigation Tabs ─────────────────────────────────────────────── */
+    .nav {
+      background: var(--navy2);
+      border-bottom: 1px solid var(--border);
+      padding: 0 32px;
+      display: flex;
+      gap: 4px;
+      overflow-x: auto;
+    }
+    .nav-tab {
+      background: transparent;
+      border: none;
+      color: rgba(255,255,255,0.5);
+      font-size: 0.82rem;
+      font-weight: 500;
+      padding: 14px 18px;
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      transition: all 0.2s;
+      white-space: nowrap;
+      letter-spacing: 0.3px;
+    }
+    .nav-tab:hover { color: rgba(255,255,255,0.8); }
+    .nav-tab.active {
+      color: var(--teal);
+      border-bottom-color: var(--teal);
+      font-weight: 600;
+    }
+
+    /* ── Main Content ────────────────────────────────────────────────── */
+    .main { padding: 28px 32px; max-width: 1600px; margin: 0 auto; }
+
+    /* ── Section Heading ─────────────────────────────────────────────── */
+    .section-heading {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--white);
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .section-heading::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    /* ── Metric Cards ────────────────────────────────────────────────── */
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 16px;
+      margin-bottom: 28px;
+    }
+    .metric-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 20px;
+      position: relative;
+      overflow: hidden;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .metric-card:hover { transform: translateY(-2px); box-shadow: var(--shadow); }
+    .metric-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+      background: var(--accent, var(--teal));
+    }
+    .metric-label {
+      font-size: 0.72rem;
+      color: rgba(255,255,255,0.45);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 8px;
+    }
+    .metric-value {
+      font-size: 1.7rem;
+      font-weight: 800;
+      color: var(--white);
+      line-height: 1.1;
+    }
+    .metric-sub {
+      font-size: 0.75rem;
+      color: rgba(255,255,255,0.4);
+      margin-top: 4px;
+    }
+    .metric-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 0.72rem;
+      font-weight: 600;
+      padding: 3px 8px;
+      border-radius: 20px;
+      margin-top: 8px;
+    }
+    .badge-up { background: rgba(0,200,83,0.15); color: var(--green); }
+    .badge-down { background: rgba(255,61,0,0.15); color: var(--red); }
+    .badge-neutral { background: rgba(0,180,216,0.15); color: var(--teal); }
+
+    /* ── Charts Row ──────────────────────────────────────────────────── */
+    .charts-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 16px;
+      margin-bottom: 28px;
+    }
+    @media (max-width: 1200px) { .charts-grid { grid-template-columns: 1fr 1fr; } }
+    @media (max-width: 768px)  { .charts-grid { grid-template-columns: 1fr; } }
+    .chart-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 20px;
+    }
+    .chart-title {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: rgba(255,255,255,0.6);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 16px;
+    }
+    .chart-card canvas { max-height: 220px; }
+
+    /* ── Tables ──────────────────────────────────────────────────────── */
+    .table-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      margin-bottom: 28px;
+      overflow: hidden;
+    }
+    .table-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border);
+    }
+    .table-header-title {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: rgba(255,255,255,0.8);
+      letter-spacing: 0.5px;
+    }
+    .table-actions {
+      display: flex;
+      gap: 8px;
+    }
+    .btn-sm {
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.1);
+      color: rgba(255,255,255,0.6);
+      font-size: 0.75rem;
+      padding: 6px 12px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn-sm:hover { background: rgba(255,255,255,0.1); color: white; }
+    .btn-primary {
+      background: var(--teal);
+      border: none;
+      color: var(--navy);
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 6px 14px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn-primary:hover { background: var(--teal2); color: white; }
+    .table-scroll { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th {
+      background: rgba(0,0,0,0.2);
+      color: rgba(255,255,255,0.5);
+      font-size: 0.7rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      padding: 10px 16px;
+      text-align: left;
+      white-space: nowrap;
+    }
+    td {
+      padding: 11px 16px;
+      font-size: 0.82rem;
+      color: rgba(255,255,255,0.85);
+      border-bottom: 1px solid rgba(255,255,255,0.04);
+      white-space: nowrap;
+    }
+    tr:hover td { background: rgba(255,255,255,0.03); }
+    .text-right { text-align: right; }
+    .text-center { text-align: center; }
+
+    /* Chips */
+    .chip {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 20px;
+      font-size: 0.7rem;
+      font-weight: 600;
+    }
+    .chip-green  { background: rgba(0,200,83,0.15); color: var(--green); }
+    .chip-red    { background: rgba(255,61,0,0.15); color: var(--red); }
+    .chip-blue   { background: rgba(0,180,216,0.15); color: var(--teal); }
+    .chip-orange { background: rgba(255,107,53,0.15); color: #FF6B35; }
+    .chip-gray   { background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.4); }
+    .chip-gold   { background: rgba(255,215,0,0.15); color: var(--gold); }
+
+    /* Positive / Negative P&L */
+    .pos { color: var(--green); font-weight: 600; }
+    .neg { color: var(--red); font-weight: 600; }
+
+    /* ── Benchmark Progress ──────────────────────────────────────────── */
+    .benchmark-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 12px;
+      margin-bottom: 28px;
+    }
+    .bm-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px;
+    }
+    .bm-level {
+      font-size: 0.7rem;
+      color: rgba(255,255,255,0.35);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 4px;
+    }
+    .bm-target {
+      font-size: 1rem;
+      font-weight: 700;
+      margin-bottom: 10px;
+    }
+    .progress-bar {
+      height: 6px;
+      background: rgba(255,255,255,0.08);
+      border-radius: 3px;
+      overflow: hidden;
+      margin-bottom: 6px;
+    }
+    .progress-fill {
+      height: 100%;
+      border-radius: 3px;
+      transition: width 1s ease;
+    }
+    .fill-green  { background: var(--green); }
+    .fill-teal   { background: var(--teal); }
+    .fill-orange { background: #FF6B35; }
+    .bm-pct { font-size: 0.7rem; color: rgba(255,255,255,0.4); }
+    .bm-hit-badge {
+      font-size: 0.68rem;
+      font-weight: 700;
+      color: var(--green);
+      letter-spacing: 0.5px;
+    }
+
+    /* ── Connect Sheet Banner ────────────────────────────────────────── */
+    .connect-banner {
+      background: linear-gradient(135deg, rgba(0,180,216,0.12), rgba(0,119,182,0.08));
+      border: 1px solid rgba(0,180,216,0.25);
+      border-radius: 14px;
+      padding: 20px 24px;
+      margin-bottom: 28px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .connect-banner-icon { font-size: 2rem; }
+    .connect-banner-text h3 { font-size: 0.95rem; font-weight: 700; margin-bottom: 4px; }
+    .connect-banner-text p { font-size: 0.8rem; color: rgba(255,255,255,0.5); }
+    .connect-banner-text code {
+      background: rgba(0,0,0,0.3);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 0.78rem;
+      color: var(--teal);
+    }
+
+    /* ── Tab Panels ──────────────────────────────────────────────────── */
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+
+    /* ── Footer ──────────────────────────────────────────────────────── */
+    .footer {
+      border-top: 1px solid var(--border);
+      padding: 20px 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      color: rgba(255,255,255,0.25);
+      font-size: 0.72rem;
+    }
+
+    /* ── Responsive ──────────────────────────────────────────────────── */
+    @media (max-width: 768px) {
+      .main { padding: 16px; }
+      .header { padding: 0 16px; }
+      .nav { padding: 0 16px; }
+      .metrics-grid { grid-template-columns: 1fr 1fr; }
+    }
+    @media (max-width: 480px) {
+      .metrics-grid { grid-template-columns: 1fr; }
+    }
+
+    /* Loading spinner */
+    .spinner {
+      width: 40px; height: 40px;
+      border: 3px solid rgba(0,180,216,0.2);
+      border-top-color: var(--teal);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin: 60px auto;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+  </style>
+</head>
+<body>
+
+<!-- ════════════════════════════════════════════════
+     AUTH SCREEN
+════════════════════════════════════════════════ -->
+<div id="auth-screen">
+  <div class="auth-logo">ZDJ Ventures</div>
+  <div class="auth-sub">TradeVesting Intelligence Platform</div>
+
+  <div class="auth-card">
+    <h2>Sign In to Continue</h2>
+    <p>Secure access to your portfolio analytics. Your data stays private — we only request read access to your Google Sheets.</p>
+
+    <!-- Google One-Tap / Sign-In button rendered below -->
+    <div id="g_id_signin" style="display:flex; justify-content:center; margin-bottom:12px;"></div>
+
+    <button class="google-btn" onclick="handleGoogleSignIn()">
+      <svg width="20" height="20" viewBox="0 0 48 48">
+        <path fill="#EA4335" d="M24 9.5c3.5 0 6.6 1.2 9.1 3.2l6.8-6.8C35.8 2.1 30.2 0 24 0 14.8 0 6.9 5.4 3 13.2l7.9 6.1C12.8 13.4 18 9.5 24 9.5z"/>
+        <path fill="#4285F4" d="M46.5 24.6c0-1.6-.1-3.2-.4-4.6H24v8.7h12.7c-.5 2.9-2.2 5.3-4.7 7l7.3 5.7c4.3-3.9 6.7-9.7 6.7-16.8z"/>
+        <path fill="#FBBC05" d="M10.9 28.6c-.5-1.5-.8-3-.8-4.6s.3-3.1.8-4.6L3 13.2C1.1 17 0 21.4 0 24s1.1 7 3 10.8l7.9-6.2z"/>
+        <path fill="#34A853" d="M24 48c6.2 0 11.4-2 15.2-5.5l-7.3-5.7c-2.1 1.4-4.8 2.2-7.9 2.2-6 0-11.2-4-13.1-9.4L3 35.8C6.9 43 14.8 48 24 48z"/>
+      </svg>
+      Continue with Google
+    </button>
+
+    <button class="demo-btn" onclick="loadDemo()">
+      📊 View Demo Mode (no login required)
+    </button>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════
+     APP
+════════════════════════════════════════════════ -->
+<div id="app">
+
+  <!-- Header -->
+  <header class="header">
+    <div class="header-brand">
+      <div class="header-logo">ZDJ</div>
+      <div class="header-divider"></div>
+      <div class="header-title">TradeVesting Command Center</div>
+    </div>
+    <div class="header-right">
+      <div class="live-badge">
+        <div class="live-dot"></div>
+        Live
+      </div>
+      <div class="last-updated" id="last-updated-label">Updating…</div>
+      <button class="btn-sm" onclick="refreshAll()">↻ Refresh</button>
+      <div class="user-avatar" id="user-avatar" title="Signed in"></div>
+      <button class="signout-btn" onclick="signOut()">Sign Out</button>
+    </div>
+  </header>
+
+  <!-- Nav -->
+  <nav class="nav">
+    <button class="nav-tab active" onclick="switchTab('overview', this)">📊 Overview</button>
+    <button class="nav-tab" onclick="switchTab('covered-calls', this)">📋 Covered Calls</button>
+    <button class="nav-tab" onclick="switchTab('equities', this)">📈 Equities</button>
+    <button class="nav-tab" onclick="switchTab('crypto', this)">₿ Crypto</button>
+    <button class="nav-tab" onclick="switchTab('staking', this)">⚡ Staking</button>
+    <button class="nav-tab" onclick="switchTab('benchmarks', this)">🎯 Benchmarks</button>
+    <button class="nav-tab" onclick="switchTab('settings', this)">⚙ Settings</button>
+  </nav>
+
+  <!-- Main -->
+  <main class="main">
+
+    <!-- ── OVERVIEW TAB ──────────────────────────────────────────── -->
+    <div class="tab-panel active" id="tab-overview">
+
+      <div class="connect-banner" id="connect-banner" style="display:none;">
+        <div class="connect-banner-icon">🔗</div>
+        <div class="connect-banner-text">
+          <h3>Connect Your Google Sheet for Live Data</h3>
+          <p>Go to <strong>⚙ Settings</strong> and paste your Google Sheets URL. The dashboard will pull your trade data automatically on every load.
+            Expecting columns: <code>Ticker | Date | P&L | Status</code></p>
+        </div>
+        <button class="btn-primary" onclick="switchTab('settings', document.querySelector('[onclick*=settings]'))">Configure →</button>
+      </div>
+
+      <div class="metrics-grid" id="overview-metrics"></div>
+
+      <div class="charts-grid">
+        <div class="chart-card">
+          <div class="chart-title">P&L by Layer</div>
+          <canvas id="chart-layers"></canvas>
+        </div>
+        <div class="chart-card">
+          <div class="chart-title">Portfolio Allocation</div>
+          <canvas id="chart-allocation"></canvas>
+        </div>
+        <div class="chart-card">
+          <div class="chart-title">Monthly CC Premium</div>
+          <canvas id="chart-monthly"></canvas>
+        </div>
+      </div>
+
+      <div class="section-heading">Recent Covered Call Trades</div>
+      <div class="table-card">
+        <div class="table-header">
+          <div class="table-header-title">Covered Call Log</div>
+          <div class="table-actions">
+            <button class="btn-sm" onclick="exportCSV()">⬇ Export CSV</button>
+          </div>
+        </div>
+        <div class="table-scroll">
+          <table id="cc-table-overview">
+            <thead>
+              <tr>
+                <th>Ticker</th>
+                <th>Trade Date</th>
+                <th>Exp. Date</th>
+                <th class="text-right">Contracts</th>
+                <th class="text-right">Strike</th>
+                <th class="text-right">Credit ($)</th>
+                <th class="text-right">Net P&L</th>
+                <th class="text-right">ROI</th>
+                <th class="text-center">Status</th>
+                <th>ITM/OTM</th>
+              </tr>
+            </thead>
+            <tbody id="cc-body-overview"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── COVERED CALLS TAB ──────────────────────────────────────── -->
+    <div class="tab-panel" id="tab-covered-calls">
+      <div class="metrics-grid" id="cc-metrics"></div>
+      <div class="section-heading">All Covered Call Trades</div>
+      <div class="table-card">
+        <div class="table-header">
+          <div class="table-header-title">Full Covered Call Register</div>
+          <div class="table-actions">
+            <select id="cc-filter-status" class="btn-sm" onchange="renderCCTable()" style="padding:6px 10px;">
+              <option value="all">All Status</option>
+              <option value="Filled">Filled</option>
+              <option value="Open">Open</option>
+              <option value="Expired">Expired</option>
+              <option value="Assigned">Assigned</option>
+            </select>
+            <button class="btn-sm" onclick="exportCSV('cc')">⬇ CSV</button>
+          </div>
+        </div>
+        <div class="table-scroll">
+          <table id="cc-full-table">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Ticker</th>
+                <th>Trade Date</th>
+                <th>Exp. Date</th>
+                <th class="text-right">Shares</th>
+                <th class="text-right">Cost/Share</th>
+                <th class="text-right">Contracts</th>
+                <th class="text-right">Strike</th>
+                <th class="text-right">Credit</th>
+                <th class="text-right">Debit</th>
+                <th class="text-right">Net P&L</th>
+                <th class="text-right">ROI %</th>
+                <th class="text-center">Status</th>
+                <th class="text-center">Assigned</th>
+                <th>ITM/OTM</th>
+              </tr>
+            </thead>
+            <tbody id="cc-full-body"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── EQUITIES TAB ───────────────────────────────────────────── -->
+    <div class="tab-panel" id="tab-equities">
+      <div class="metrics-grid" id="eq-metrics"></div>
+      <div class="section-heading">Equity Trade Log</div>
+      <div class="table-card">
+        <div class="table-header">
+          <div class="table-header-title">Equity Positions</div>
+        </div>
+        <div class="table-scroll">
+          <table>
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Ticker</th>
+                <th>Type</th>
+                <th>Entry Date</th>
+                <th class="text-right">Qty</th>
+                <th class="text-right">Entry Price</th>
+                <th>Exit Date</th>
+                <th class="text-right">Exit Qty</th>
+                <th class="text-right">Exit Price</th>
+                <th class="text-right">P&L/Share</th>
+                <th class="text-right">Total P&L</th>
+              </tr>
+            </thead>
+            <tbody id="eq-body"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── CRYPTO TAB ─────────────────────────────────────────────── -->
+    <div class="tab-panel" id="tab-crypto">
+      <div class="metrics-grid" id="crypto-metrics"></div>
+      <div class="charts-grid" style="grid-template-columns: 1fr 1fr;">
+        <div class="chart-card">
+          <div class="chart-title">Crypto P&L Over Time</div>
+          <canvas id="chart-crypto-pnl"></canvas>
+        </div>
+        <div class="chart-card">
+          <div class="chart-title">Holdings by Token</div>
+          <canvas id="chart-crypto-alloc"></canvas>
+        </div>
+      </div>
+      <div class="section-heading">Crypto Transaction Log</div>
+      <div class="table-card">
+        <div class="table-header">
+          <div class="table-header-title">All Crypto Transactions</div>
+        </div>
+        <div class="table-scroll">
+          <table>
+            <thead>
+              <tr>
+                <th>Token</th>
+                <th>Type</th>
+                <th>Date</th>
+                <th class="text-right">Quantity</th>
+                <th class="text-right">USD In ($)</th>
+                <th class="text-right">USD Out ($)</th>
+                <th class="text-right">Realized P&L ($)</th>
+                <th class="text-right">% Return</th>
+                <th>Platform</th>
+              </tr>
+            </thead>
+            <tbody id="crypto-body"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── STAKING TAB ────────────────────────────────────────────── -->
+    <div class="tab-panel" id="tab-staking">
+      <div class="metrics-grid" id="staking-metrics"></div>
+      <div class="section-heading">Active Staking Positions</div>
+      <div class="table-card">
+        <div class="table-header">
+          <div class="table-header-title">Staking Register</div>
+        </div>
+        <div class="table-scroll">
+          <table>
+            <thead>
+              <tr>
+                <th>Token</th>
+                <th class="text-right">Qty Staked</th>
+                <th class="text-right">Period (days)</th>
+                <th class="text-right">USD at Deposit</th>
+                <th>Date Bonded</th>
+                <th>APY Promised</th>
+                <th>Date Unbonded</th>
+                <th class="text-right">Qty Withdrawn</th>
+                <th class="text-right">Interest Earned</th>
+                <th class="text-right">Actual %</th>
+              </tr>
+            </thead>
+            <tbody id="staking-body"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── BENCHMARKS TAB ─────────────────────────────────────────── -->
+    <div class="tab-panel" id="tab-benchmarks">
+      <div class="section-heading">3-Layer Portfolio Bonus Benchmarks</div>
+      <div class="metrics-grid" id="bm-totals"></div>
+      <div class="benchmark-grid" id="benchmark-cards"></div>
+      <div class="section-heading">Payout Schedule</div>
+      <div class="table-card">
+        <div class="table-header">
+          <div class="table-header-title">Benchmark Payout Register</div>
+        </div>
+        <div class="table-scroll">
+          <table>
+            <thead>
+              <tr>
+                <th>Level</th>
+                <th class="text-right">Target ($)</th>
+                <th class="text-center">Status</th>
+                <th class="text-right">Zack Payout ($)</th>
+                <th class="text-right">Chris Payout ($)</th>
+              </tr>
+            </thead>
+            <tbody id="benchmark-body"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── SETTINGS TAB ───────────────────────────────────────────── -->
+    <div class="tab-panel" id="tab-settings">
+      <div class="section-heading">Data Source Configuration</div>
+      <div class="table-card" style="padding: 28px;">
+        <h3 style="margin-bottom: 8px; font-size:1rem;">Connect Your Google Sheet</h3>
+        <p style="color:rgba(255,255,255,0.5); font-size:0.85rem; margin-bottom:20px; line-height:1.6;">
+          Paste the URL of your ZDJ TradeVesting Google Sheet below. Make sure the sheet is shared with "Anyone with the link can view" or your authenticated Google account has access.
+        </p>
+        <div style="display:flex; gap:12px; margin-bottom:24px; flex-wrap:wrap;">
+          <input id="sheets-url" type="text"
+            placeholder="https://docs.google.com/spreadsheets/d/YOUR_SHEET_ID/edit"
+            style="flex:1; min-width:280px; background:rgba(0,0,0,0.3); border:1px solid rgba(255,255,255,0.15);
+                   color:white; padding:10px 14px; border-radius:8px; font-size:0.85rem;"
+            value="" />
+          <button class="btn-primary" onclick="saveSheetConfig()" style="padding:10px 20px; font-size:0.85rem;">
+            Save & Connect
+          </button>
+        </div>
+        <div id="sheet-status" style="font-size:0.8rem; color:rgba(255,255,255,0.4);"></div>
+
+        <hr style="border-color: var(--border); margin: 28px 0;" />
+
+        <h3 style="margin-bottom: 8px; font-size:1rem;">Expected Sheet Tab Names</h3>
+        <p style="color:rgba(255,255,255,0.5); font-size:0.82rem; margin-bottom:16px;">
+          The dashboard reads these exact tab names from your Google Sheet:
+        </p>
+        <table style="font-size:0.82rem;">
+          <thead>
+            <tr>
+              <th>Sheet Tab</th>
+              <th>Dashboard Section</th>
+              <th>Key Columns</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>📋 CC TRACKER</td><td>Covered Calls</td><td>Ticker, Trade Date, Contracts, Credit, Status, P&L</td></tr>
+            <tr><td>📈 EQUITY TRADES</td><td>Equities</td><td>Ticker, Entry Date, Exit Date, Qty, Entry/Exit Price</td></tr>
+            <tr><td>₿ CRYPTO TRACKER</td><td>Crypto</td><td>Token, Type, Date, Qty, USD In/Out, P&L</td></tr>
+            <tr><td>⚡ STAKING</td><td>Staking</td><td>Token, Qty, Period, APY, Dates</td></tr>
+            <tr><td>🎯 BONUS TRACKER</td><td>Benchmarks</td><td>Layer, P&L, Targets</td></tr>
+          </tbody>
+        </table>
+
+        <hr style="border-color: var(--border); margin: 28px 0;" />
+
+        <h3 style="margin-bottom: 8px; font-size:1rem;">Share Dashboard with a Client</h3>
+        <p style="color:rgba(255,255,255,0.5); font-size:0.82rem; margin-bottom:16px; line-height:1.6;">
+          Host this HTML file on any static hosting (GitHub Pages, Netlify, Vercel — all free). Share the URL. Clients sign in with their Google account; as long as the connected Sheet grants them access, they'll see live data.
+        </p>
+        <div style="background:rgba(0,0,0,0.3); border-radius:8px; padding:16px; font-size:0.78rem; color:var(--teal); font-family:monospace; line-height:2;">
+          # Quick deploy steps:<br/>
+          1. Upload ZDJ_TradeVesting_Dashboard.html to GitHub repo<br/>
+          2. Enable GitHub Pages (Settings → Pages → Deploy from main)<br/>
+          3. Share URL: https://your-username.github.io/your-repo/<br/>
+          4. Configure Google OAuth at console.cloud.google.com<br/>
+          &nbsp;&nbsp; → Add your Page URL to "Authorized JavaScript origins"
+        </div>
+
+        <hr style="border-color: var(--border); margin: 28px 0;" />
+        <h3 style="margin-bottom: 12px; font-size:1rem;">Auto-Refresh</h3>
+        <div style="display:flex; align-items:center; gap:12px;">
+          <label style="font-size:0.85rem; color:rgba(255,255,255,0.6);">Refresh every:</label>
+          <select id="refresh-interval" onchange="setRefreshInterval()"
+            style="background:rgba(0,0,0,0.3); border:1px solid rgba(255,255,255,0.15); color:white;
+                   padding:8px 12px; border-radius:8px; font-size:0.82rem;">
+            <option value="0">Manual only</option>
+            <option value="60">1 minute</option>
+            <option value="300" selected>5 minutes</option>
+            <option value="900">15 minutes</option>
+            <option value="3600">1 hour</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <footer class="footer">
+    <div>ZDJ Ventures LLC  ·  TradeVesting Command Center  ·  2026</div>
+    <div>communications@zdj-ventures.com  ·  Data for advisory purposes only</div>
+  </footer>
+</div>
+
+<!-- ════════════════════════════════════════════════
+     SCRIPTS
+════════════════════════════════════════════════ -->
+<script>
+/* ─── CONFIG ──────────────────────────────────────────────────────────── */
+// Replace with your Google OAuth Client ID from console.cloud.google.com
+const GOOGLE_CLIENT_ID = '327668248617-alr7cic71qefab11idchroskv50c1m43.apps.googleusercontent.com';
+
+/* ─── STATE ───────────────────────────────────────────────────────────── */
+let state = {
+  user: null,
+  sheetId: localStorage.getItem('zdj_sheet_id') || '',
+  data: null,
+  refreshTimer: null,
+};
+
+/* ─── DEMO DATA ───────────────────────────────────────────────────── */
+const DEMO = {
+  summary: {
+    coveredCallPnl: 78045.40,
+    equityPnl:      58907.04,
+    cryptoPnl:      13142.11,
+    totalPnl:       150094.55,
+    startingBalance:98000,
+    currentBalance: 248094.55,
+    totalTrades:    165,
+    winRate:        0.74,
+    avgROI:         0.312,
+    monthlyAvg:     12507.88,
+  },
+  coveredCalls: [
+    /* ── Original sample rows ── */
+    { ticker:'TSLA',  tradeDate:'2026-01-05', expDate:'2026-01-17', shares:100, costShare:185.40, contracts:1, strike:195, credit:4.20, debit:0,    status:'Expired', assigned:'No',  pnl:420.00,  roi:0.0215 },
+    { ticker:'NVDA',  tradeDate:'2026-01-08', expDate:'2026-01-24', shares:100, costShare:495.20, contracts:1, strike:520, credit:8.50, debit:2.10, status:'Closed',  assigned:'No',  pnl:640.00,  roi:0.0123 },
+    { ticker:'AAPL',  tradeDate:'2026-01-12', expDate:'2026-01-31', shares:200, costShare:182.30, contracts:2, strike:190, credit:3.80, debit:0,    status:'Expired', assigned:'No',  pnl:760.00,  roi:0.0200 },
+    { ticker:'AMZN',  tradeDate:'2026-01-15', expDate:'2026-02-07', shares:100, costShare:178.50, contracts:1, strike:185, credit:5.20, debit:1.30, status:'Closed',  assigned:'No',  pnl:390.00,  roi:0.0211 },
+    { ticker:'MSFT',  tradeDate:'2026-01-19', expDate:'2026-02-14', shares:100, costShare:372.10, contracts:1, strike:385, credit:6.90, debit:0,    status:'Expired', assigned:'No',  pnl:690.00,  roi:0.0179 },
+    { ticker:'LAC',   tradeDate:'2026-01-22', expDate:'2026-02-07', shares:500, costShare:4.85,   contracts:5, strike:5,   credit:0.45, debit:0,    status:'Expired', assigned:'No',  pnl:225.00,  roi:0.0900 },
+    { ticker:'LAC',   tradeDate:'2026-01-29', expDate:'2026-02-21', shares:500, costShare:4.72,   contracts:5, strike:5,   credit:0.38, debit:0,    status:'Expired', assigned:'No',  pnl:190.00,  roi:0.0760 },
+    { ticker:'LAC',   tradeDate:'2026-02-03', expDate:'2026-02-21', shares:500, costShare:4.65,   contracts:5, strike:5,   credit:0.42, debit:0,    status:'Expired', assigned:'No',  pnl:210.00,  roi:0.0840 },
+    { ticker:'LAC',   tradeDate:'2026-02-09', expDate:'2026-02-28', shares:500, costShare:4.58,   contracts:5, strike:5,   credit:0.35, debit:0,    status:'Filled',  assigned:'No',  pnl:175.00,  roi:0.0700 },
+    { ticker:'MSTR',  tradeDate:'2026-02-02', expDate:'2026-02-21', shares:100, costShare:285.40, contracts:1, strike:300, credit:9.20, debit:0,    status:'Expired', assigned:'No',  pnl:920.00,  roi:0.0307 },
+    { ticker:'COIN',  tradeDate:'2026-02-05', expDate:'2026-02-28', shares:100, costShare:192.30, contracts:1, strike:205, credit:7.40, debit:1.80, status:'Closed',  assigned:'No',  pnl:560.00,  roi:0.0273 },
+    { ticker:'AMD',   tradeDate:'2026-02-10', expDate:'2026-02-28', shares:100, costShare:142.50, contracts:1, strike:150, credit:4.60, debit:0,    status:'Expired', assigned:'No',  pnl:460.00,  roi:0.0307 },
+    { ticker:'PLTR',  tradeDate:'2026-02-12', expDate:'2026-03-07', shares:200, costShare:38.20,  contracts:2, strike:42,  credit:2.10, debit:0.50, status:'Closed',  assigned:'No',  pnl:320.00,  roi:0.0381 },
+    { ticker:'SMCI',  tradeDate:'2026-02-18', expDate:'2026-03-14', shares:100, costShare:42.80,  contracts:1, strike:46,  credit:2.80, debit:0,    status:'Expired', assigned:'No',  pnl:280.00,  roi:0.0609 },
+    { ticker:'TSLA',  tradeDate:'2026-02-23', expDate:'2026-03-14', shares:100, costShare:192.40, contracts:1, strike:205, credit:7.20, debit:2.40, status:'Closed',  assigned:'No',  pnl:480.00,  roi:0.0234 },
+    { ticker:'NVDA',  tradeDate:'2026-03-02', expDate:'2026-03-21', shares:100, costShare:512.30, contracts:1, strike:535, credit:9.80, debit:0,    status:'Expired', assigned:'No',  pnl:980.00,  roi:0.0183 },
+    { ticker:'META',  tradeDate:'2026-03-05', expDate:'2026-03-28', shares:100, costShare:485.20, contracts:1, strike:510, credit:8.40, debit:0,    status:'Expired', assigned:'No',  pnl:840.00,  roi:0.0165 },
+    { ticker:'LAC',   tradeDate:'2026-03-09', expDate:'2026-03-28', shares:500, costShare:4.92,   contracts:5, strike:5,   credit:0.48, debit:0,    status:'Expired', assigned:'No',  pnl:240.00,  roi:0.0960 },
+    { ticker:'LAC',   tradeDate:'2026-03-16', expDate:'2026-04-04', shares:500, costShare:5.02,   contracts:5, strike:5.5, credit:0.52, debit:0,    status:'Expired', assigned:'No',  pnl:260.00,  roi:0.0945 },
+    { ticker:'AAPL',  tradeDate:'2026-03-18', expDate:'2026-04-04', shares:200, costShare:185.40, contracts:2, strike:195, credit:4.10, debit:0,    status:'Expired', assigned:'No',  pnl:820.00,  roi:0.0210 },
+    /* ── v2 new rows ── */
+    { ticker:'TQQQ',  tradeDate:'2026-04-14', expDate:'2026-04-25', shares:100, costShare:52.30,  contracts:1, strike:55,  credit:1.85, debit:0,    status:'Expired', assigned:'No',  pnl:185.00,  roi:0.0336 },
+    { ticker:'WOLF',  tradeDate:'2026-04-14', expDate:'2026-04-25', shares:100, costShare:3.82,   contracts:1, strike:4,   credit:0.22, debit:0,    status:'Expired', assigned:'No',  pnl:22.00,   roi:0.0550 },
+    { ticker:'WOLF',  tradeDate:'2026-04-28', expDate:'2026-05-09', shares:100, costShare:3.95,   contracts:1, strike:4,   credit:0.18, debit:0,    status:'Expired', assigned:'No',  pnl:18.00,   roi:0.0450 },
+    { ticker:'UUUU',  tradeDate:'2026-04-14', expDate:'2026-04-25', shares:200, costShare:5.12,   contracts:2, strike:5.5, credit:0.28, debit:0,    status:'Expired', assigned:'No',  pnl:56.00,   roi:0.0509 },
+    { ticker:'UUUU',  tradeDate:'2026-04-28', expDate:'2026-05-09', shares:200, costShare:5.20,   contracts:2, strike:5.5, credit:0.32, debit:0,    status:'Expired', assigned:'No',  pnl:64.00,   roi:0.0582 },
+    { ticker:'UUUU',  tradeDate:'2026-05-12', expDate:'2026-05-23', shares:200, costShare:5.35,   contracts:2, strike:5.5, credit:0.30, debit:0,    status:'Expired', assigned:'No',  pnl:60.00,   roi:0.0545 },
+    { ticker:'UUUU',  tradeDate:'2026-04-14', expDate:'2026-04-25', shares:400, costShare:5.08,   contracts:4, strike:5.5, credit:0.26, debit:0,    status:'Expired', assigned:'No',  pnl:104.00,  roi:0.0473 },
+    { ticker:'UUUU',  tradeDate:'2026-04-28', expDate:'2026-05-09', shares:400, costShare:5.15,   contracts:4, strike:5.5, credit:0.29, debit:0,    status:'Expired', assigned:'No',  pnl:116.00,  roi:0.0527 },
+    { ticker:'UUUU',  tradeDate:'2026-05-12', expDate:'2026-05-23', shares:400, costShare:5.28,   contracts:4, strike:5.5, credit:0.31, debit:0,    status:'Filled',  assigned:'No',  pnl:124.00,  roi:0.0564 },
+    { ticker:'NIO',   tradeDate:'2026-04-14', expDate:'2026-04-25', shares:200, costShare:4.48,   contracts:2, strike:4.5, credit:0.20, debit:0,    status:'Expired', assigned:'No',  pnl:40.00,   roi:0.0444 },
+    { ticker:'NIO',   tradeDate:'2026-04-28', expDate:'2026-05-09', shares:200, costShare:4.55,   contracts:2, strike:5,   credit:0.25, debit:0,    status:'Expired', assigned:'No',  pnl:50.00,   roi:0.0500 },
+    { ticker:'NIO',   tradeDate:'2026-05-12', expDate:'2026-05-23', shares:200, costShare:4.62,   contracts:2, strike:5,   credit:0.22, debit:0,    status:'Filled',  assigned:'No',  pnl:44.00,   roi:0.0440 },
+    { ticker:'LAC',   tradeDate:'2026-04-14', expDate:'2026-04-25', shares:500, costShare:5.18,   contracts:5, strike:5.5, credit:0.55, debit:0,    status:'Expired', assigned:'No',  pnl:275.00,  roi:0.1000 },
+    { ticker:'LAC',   tradeDate:'2026-04-28', expDate:'2026-05-09', shares:500, costShare:5.25,   contracts:5, strike:5.5, credit:0.48, debit:0,    status:'Expired', assigned:'No',  pnl:240.00,  roi:0.0873 },
+    { ticker:'LAC',   tradeDate:'2026-05-12', expDate:'2026-05-23', shares:500, costShare:5.32,   contracts:5, strike:5.5, credit:0.51, debit:0,    status:'Expired', assigned:'No',  pnl:255.00,  roi:0.0927 },
+    { ticker:'LAC',   tradeDate:'2026-04-14', expDate:'2026-04-25', shares:500, costShare:5.10,   contracts:5, strike:5.5, credit:0.46, debit:0,    status:'Expired', assigned:'No',  pnl:230.00,  roi:0.0836 },
+    { ticker:'LAC',   tradeDate:'2026-04-28', expDate:'2026-05-09', shares:500, costShare:5.20,   contracts:5, strike:5.5, credit:0.50, debit:0,    status:'Expired', assigned:'No',  pnl:250.00,  roi:0.0909 },
+    { ticker:'LAC',   tradeDate:'2026-05-12', expDate:'2026-05-23', shares:500, costShare:5.30,   contracts:5, strike:5.5, credit:0.53, debit:0,    status:'Filled',  assigned:'No',  pnl:265.00,  roi:0.0964 },
+    { ticker:'LAC',   tradeDate:'2026-05-19', expDate:'2026-05-30', shares:500, costShare:5.38,   contracts:5, strike:5.5, credit:0.44, debit:0,    status:'Open',    assigned:'No',  pnl:220.00,  roi:0.0800 },
+    { ticker:'SMR',   tradeDate:'2026-04-28', expDate:'2026-05-09', shares:100, costShare:14.20,  contracts:1, strike:15,  credit:0.65, debit:0,    status:'Expired', assigned:'No',  pnl:65.00,   roi:0.0433 },
+    { ticker:'SMR',   tradeDate:'2026-05-12', expDate:'2026-05-23', shares:100, costShare:14.85,  contracts:1, strike:15,  credit:0.72, debit:0,    status:'Expired', assigned:'No',  pnl:72.00,   roi:0.0480 },
+    { ticker:'SMR',   tradeDate:'2026-05-19', expDate:'2026-05-30', shares:100, costShare:15.10,  contracts:1, strike:16,  credit:0.68, debit:0,    status:'Open',    assigned:'No',  pnl:68.00,   roi:0.0425 },
+    { ticker:'SPCE',  tradeDate:'2026-04-28', expDate:'2026-05-09', shares:200, costShare:2.15,   contracts:2, strike:2.5, credit:0.18, debit:0,    status:'Expired', assigned:'No',  pnl:36.00,   roi:0.0720 },
+    { ticker:'SPCE',  tradeDate:'2026-05-12', expDate:'2026-05-23', shares:200, costShare:2.22,   contracts:2, strike:2.5, credit:0.20, debit:0,    status:'Filled',  assigned:'No',  pnl:40.00,   roi:0.0800 },
+  ],
+  equities: [
+    { ticker:'TSLA',  type:'Long', entryDate:'2026-01-05', exitDate:'2026-02-18', qty:100, entryPrice:185.40, exitPrice:242.80, pnl:5740.00, pctGain:0.3096 },
+    { ticker:'NVDA',  type:'Long', entryDate:'2026-01-08', exitDate:'2026-03-15', qty:50,  entryPrice:495.20, exitPrice:682.40, pnl:9360.00, pctGain:0.3782 },
+    { ticker:'AAPL',  type:'Long', entryDate:'2026-01-12', exitDate:'',           qty:200, entryPrice:182.30, exitPrice:198.50, pnl:3240.00, pctGain:0.0889 },
+    { ticker:'AMZN',  type:'Long', entryDate:'2026-01-15', exitDate:'2026-03-20', qty:30,  entryPrice:178.50, exitPrice:215.30, pnl:1104.00, pctGain:0.2062 },
+    { ticker:'LAC',   type:'Long', entryDate:'2026-01-22', exitDate:'',           qty:500, entryPrice:4.85,   exitPrice:5.38,   pnl:265.00,  pctGain:0.1093 },
+    { ticker:'MSTR',  type:'Long', entryDate:'2026-02-02', exitDate:'2026-04-10', qty:50,  entryPrice:285.40, exitPrice:385.20, pnl:4990.00, pctGain:0.3497 },
+    { ticker:'COIN',  type:'Long', entryDate:'2026-02-05', exitDate:'2026-03-28', qty:40,  entryPrice:192.30, exitPrice:248.50, pnl:2248.00, pctGain:0.2923 },
+    { ticker:'AMD',   type:'Long', entryDate:'2026-02-10', exitDate:'2026-04-05', qty:75,  entryPrice:142.50, exitPrice:168.30, pnl:1935.00, pctGain:0.1811 },
+    { ticker:'PLTR',  type:'Long', entryDate:'2026-02-12', exitDate:'',           qty:200, entryPrice:38.20,  exitPrice:52.40,  pnl:2840.00, pctGain:0.3717 },
+    { ticker:'META',  type:'Long', entryDate:'2026-03-05', exitDate:'2026-04-28', qty:20,  entryPrice:485.20, exitPrice:582.40, pnl:1944.00, pctGain:0.2003 },
+    { ticker:'SMCI',  type:'Long', entryDate:'2026-02-18', exitDate:'2026-03-30', qty:100, entryPrice:42.80,  exitPrice:58.20,  pnl:1540.00, pctGain:0.3598 },
+    { ticker:'MSFT',  type:'Long', entryDate:'2026-01-19', exitDate:'2026-03-10', qty:30,  entryPrice:372.10, exitPrice:415.80, pnl:1311.00, pctGain:0.1175 },
+    /* ── v2 new equity rows ── */
+    { ticker:'HIVE',  type:'Long', entryDate:'2026-04-14', exitDate:'',           qty:300, entryPrice:3.42,   exitPrice:4.18,   pnl:228.00,  pctGain:0.2222 },
+    { ticker:'MVIS',  type:'Long', entryDate:'2026-04-14', exitDate:'',           qty:500, entryPrice:1.85,   exitPrice:2.24,   pnl:195.00,  pctGain:0.2108 },
+    { ticker:'LAC',   type:'Long', entryDate:'2026-04-14', exitDate:'',           qty:500, entryPrice:5.10,   exitPrice:5.38,   pnl:140.00,  pctGain:0.0549 },
+    { ticker:'TQQQ',  type:'Long', entryDate:'2026-04-14', exitDate:'',           qty:100, entryPrice:52.30,  exitPrice:61.85,  pnl:955.00,  pctGain:0.1826 },
+    { ticker:'UUUU',  type:'Long', entryDate:'2026-04-14', exitDate:'',           qty:200, entryPrice:5.12,   exitPrice:6.05,   pnl:186.00,  pctGain:0.1816 },
+    { ticker:'UUUU',  type:'Long', entryDate:'2026-04-14', exitDate:'',           qty:400, entryPrice:5.08,   exitPrice:6.05,   pnl:388.00,  pctGain:0.1909 },
+    { ticker:'UUUU',  type:'Long', entryDate:'2026-04-28', exitDate:'',           qty:200, entryPrice:5.20,   exitPrice:6.05,   pnl:170.00,  pctGain:0.1635 },
+    { ticker:'UUUU',  type:'Long', entryDate:'2026-04-28', exitDate:'',           qty:400, entryPrice:5.15,   exitPrice:6.05,   pnl:360.00,  pctGain:0.1748 },
+    { ticker:'UUUU',  type:'Long', entryDate:'2026-05-12', exitDate:'',           qty:200, entryPrice:5.35,   exitPrice:6.05,   pnl:140.00,  pctGain:0.1308 },
+    { ticker:'WOLF',  type:'Long', entryDate:'2026-04-14', exitDate:'',           qty:100, entryPrice:3.82,   exitPrice:4.52,   pnl:70.00,   pctGain:0.1832 },
+    { ticker:'WOLF',  type:'Long', entryDate:'2026-04-28', exitDate:'',           qty:100, entryPrice:3.95,   exitPrice:4.52,   pnl:57.00,   pctGain:0.1443 },
+    { ticker:'SPCE',  type:'Long', entryDate:'2026-04-28', exitDate:'',           qty:200, entryPrice:2.15,   exitPrice:2.58,   pnl:86.00,   pctGain:0.2000 },
+    { ticker:'SPCE',  type:'Long', entryDate:'2026-04-28', exitDate:'',           qty:200, entryPrice:2.18,   exitPrice:2.58,   pnl:80.00,   pctGain:0.1835 },
+    { ticker:'SPCE',  type:'Long', entryDate:'2026-05-12', exitDate:'',           qty:200, entryPrice:2.22,   exitPrice:2.58,   pnl:72.00,   pctGain:0.1622 },
+    { ticker:'SPCE',  type:'Long', entryDate:'2026-05-12', exitDate:'',           qty:200, entryPrice:2.25,   exitPrice:2.58,   pnl:66.00,   pctGain:0.1467 },
+    { ticker:'SPCE',  type:'Long', entryDate:'2026-05-19', exitDate:'',           qty:200, entryPrice:2.28,   exitPrice:2.58,   pnl:60.00,   pctGain:0.1316 },
+    { ticker:'SPCE',  type:'Long', entryDate:'2026-05-19', exitDate:'',           qty:200, entryPrice:2.30,   exitPrice:2.58,   pnl:56.00,   pctGain:0.1217 },
+    { ticker:'SMR',   type:'Long', entryDate:'2026-04-28', exitDate:'',           qty:100, entryPrice:14.20,  exitPrice:16.85,  pnl:265.00,  pctGain:0.1866 },
+    { ticker:'SMR',   type:'Long', entryDate:'2026-05-12', exitDate:'',           qty:100, entryPrice:14.85,  exitPrice:16.85,  pnl:200.00,  pctGain:0.1347 },
+    { ticker:'SMR',   type:'Long', entryDate:'2026-05-19', exitDate:'',           qty:100, entryPrice:15.10,  exitPrice:16.85,  pnl:175.00,  pctGain:0.1159 },
+    { ticker:'LAC',   type:'Long', entryDate:'2026-04-28', exitDate:'',           qty:500, entryPrice:5.20,   exitPrice:5.38,   pnl:90.00,   pctGain:0.0346 },
+    { ticker:'LAC',   type:'Long', entryDate:'2026-05-12', exitDate:'',           qty:500, entryPrice:5.30,   exitPrice:5.38,   pnl:40.00,   pctGain:0.0151 },
+  ],
+  crypto: [
+    { token:'Bitcoin (BTC)',  type:'Buy',  date:'2026-01-10', qty:0.25,   usdEntry:42500, usdExit:68200, pnl:6425.00, pctGain:0.6047, platform:'Coinbase' },
+    { token:'Ethereum (ETH)', type:'Buy',  date:'2026-01-15', qty:2.0,    usdEntry:2480,  usdExit:3850,  pnl:2740.00, pctGain:0.5524, platform:'Coinbase' },
+    { token:'Solana (SOL)',   type:'Buy',  date:'2026-01-20', qty:10.0,   usdEntry:118,   usdExit:185,   pnl:670.00,  pctGain:0.5678, platform:'Phantom'  },
+    { token:'Cardano (ADA)',  type:'Buy',  date:'2026-02-01', qty:1000.0, usdEntry:0.52,  usdExit:0.78,  pnl:260.00,  pctGain:0.5000, platform:'Kraken'   },
+    { token:'Chainlink (LINK)',type:'Buy', date:'2026-02-08', qty:50.0,   usdEntry:14.20, usdExit:22.50, pnl:415.00,  pctGain:0.5845, platform:'Coinbase' },
+    { token:'Polkadot (DOT)', type:'Buy',  date:'2026-02-15', qty:100.0,  usdEntry:8.40,  usdExit:0,     pnl:-840.00, pctGain:-1.000, platform:'Kraken'   },
+    { token:'Avalanche (AVAX)',type:'Buy', date:'2026-02-22', qty:20.0,   usdEntry:28.50, usdExit:42.80, pnl:286.00,  pctGain:0.5018, platform:'Coinbase' },
+    { token:'HIVE',           type:'Buy',  date:'2026-04-14', qty:1000.0, usdEntry:0.285, usdExit:0,     pnl:0,       pctGain:0,      platform:'Kraken'   },
+    { token:'Polygon (MATIC)',type:'Buy',  date:'2026-03-01', qty:500.0,  usdEntry:0.82,  usdExit:1.24,  pnl:210.00,  pctGain:0.5122, platform:'Coinbase' },
+    { token:'Bitcoin (BTC)',  type:'Buy',  date:'2026-03-10', qty:0.15,   usdEntry:65800, usdExit:0,     pnl:0,       pctGain:0,      platform:'Coinbase' },
+    { token:'Ethereum (ETH)', type:'Buy',  date:'2026-03-18', qty:1.5,    usdEntry:3420,  usdExit:0,     pnl:0,       pctGain:0,      platform:'Coinbase' },
+    { token:'Solana (SOL)',   type:'Buy',  date:'2026-04-02', qty:8.0,    usdEntry:142,   usdExit:0,     pnl:0,       pctGain:0,      platform:'Phantom'  },
+    { token:'Chainlink (LINK)',type:'Buy', date:'2026-04-15', qty:30.0,   usdEntry:18.50, usdExit:0,     pnl:0,       pctGain:0,      platform:'Coinbase' },
+    { token:'Avalanche (AVAX)',type:'Buy', date:'2026-04-22', qty:15.0,   usdEntry:36.20, usdExit:0,     pnl:0,       pctGain:0,      platform:'Coinbase' },
+  ],
+  staking: [
+    { asset:'Ethereum (ETH)', platform:'Lido',      qty:2.0,  apy:0.0382, monthlyYield:21.48,  totalEarned:128.88  },
+    { asset:'Solana (SOL)',   platform:'Marinade',  qty:18.0, apy:0.0712, monthlyYield:14.88,  totalEarned:89.28   },
+    { asset:'Cardano (ADA)',  platform:'Daedalus',  qty:1000, apy:0.0425, monthlyYield:3.54,   totalEarned:21.25   },
+    { asset:'Polkadot (DOT)', platform:'Kraken',    qty:100,  apy:0.1200, monthlyYield:8.40,   totalEarned:50.40   },
+    { asset:'HIVE',           platform:'Hive.blog', qty:1000, apy:0.0850, monthlyYield:7.10,   totalEarned:7.10    },
+  ],
+  benchmarks: [
+    { level:1,  label:'$50K',   target:50000,   ccShare:0.40, equityShare:0.35, cryptoShare:0.25, zackPct:0.50, chrisPct:0.50, hit: true  },
+    { level:2,  label:'$75K',   target:75000,   ccShare:0.40, equityShare:0.35, cryptoShare:0.25, zackPct:0.55, chrisPct:0.45, hit: true  },
+    { level:3,  label:'$100K',  target:100000,  ccShare:0.40, equityShare:0.35, cryptoShare:0.25, zackPct:0.60, chrisPct:0.40, hit: true  },
+    { level:4,  label:'$125K',  target:125000,  ccShare:0.40, equityShare:0.35, cryptoShare:0.25, zackPct:0.65, chrisPct:0.35, hit: true  },
+    { level:5,  label:'$150K',  target:150000,  ccShare:0.40, equityShare:0.35, cryptoShare:0.25, zackPct:0.70, chrisPct:0.30, hit: true  },
+    { level:6,  label:'$200K',  target:200000,  ccShare:0.42, equityShare:0.35, cryptoShare:0.23, zackPct:0.72, chrisPct:0.28, hit: false },
+    { level:7,  label:'$250K',  target:250000,  ccShare:0.42, equityShare:0.35, cryptoShare:0.23, zackPct:0.74, chrisPct:0.26, hit: false },
+    { level:8,  label:'$300K',  target:300000,  ccShare:0.45, equityShare:0.35, cryptoShare:0.20, zackPct:0.75, chrisPct:0.25, hit: false },
+    { level:9,  label:'$400K',  target:400000,  ccShare:0.45, equityShare:0.35, cryptoShare:0.20, zackPct:0.78, chrisPct:0.22, hit: false },
+    { level:10, label:'$500K',  target:500000,  ccShare:0.50, equityShare:0.30, cryptoShare:0.20, zackPct:0.80, chrisPct:0.20, hit: false },
+  ],
+  monthly: [
+    { month:'Jan 2026', cc:3850.00, equity:8420.00, crypto:1280.00, total:13550.00 },
+    { month:'Feb 2026', cc:4210.00, equity:9840.00, crypto:2150.00, total:16200.00 },
+    { month:'Mar 2026', cc:5180.00, equity:11240.00,crypto:3820.00, total:20240.00 },
+    { month:'Apr 2026', cc:18420.00,equity:14380.00,crypto:3320.00, total:36120.00 },
+    { month:'May 2026', cc:14200.00,equity:12830.00,crypto:1786.00, total:28816.00 },
+  ],
+}
+/* ─── AUTH ────────────────────────────────────────────────────────────── */
+window.onload = function() {
+  // Try to restore session
+  const saved = localStorage.getItem('zdj_user');
+  if (saved) {
+    state.user = JSON.parse(saved);
+    showApp();
+  } else {
+    // Initialize Google Sign-In button
+    if (typeof google !== 'undefined') {
+      google.accounts.id.initialize({
+        client_id: GOOGLE_CLIENT_ID,
+        callback: handleCredentialResponse,
+      });
+      google.accounts.id.renderButton(
+        document.getElementById('g_id_signin'),
+        { theme:'filled_blue', size:'large', width:300 }
+      );
+    }
+  }
+};
+
+function handleGoogleSignIn() {
+  if (GOOGLE_CLIENT_ID === 'YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com') {
+    // Demo fallback when Client ID not configured
+    loadDemo();
+    return;
+  }
+  if (typeof google !== 'undefined') {
+    google.accounts.id.prompt();
+  }
+}
+
+function handleCredentialResponse(response) {
+  // Parse JWT payload
+  const payload = JSON.parse(atob(response.credential.split('.')[1]));
+  state.user = { name: payload.name, email: payload.email, picture: payload.picture };
+  localStorage.setItem('zdj_user', JSON.stringify(state.user));
+  showApp();
+}
+
+function loadDemo() {
+  state.user = { name: 'Demo User', email: 'demo@zdj-ventures.com', picture: null };
+  showApp();
+}
+
+function showApp() {
+  document.getElementById('auth-screen').style.display = 'none';
+  document.getElementById('app').style.display = 'block';
+  updateUserUI();
+  state.data = DEMO; // Use demo data; swap with loadSheetData() when Sheet configured
+  renderAll();
+  startAutoRefresh();
+  document.getElementById('last-updated-label').textContent =
+    'Updated ' + new Date().toLocaleTimeString();
+  if (!state.sheetId) {
+    document.getElementById('connect-banner').style.display = 'flex';
+  }
+  if (state.sheetId) {
+    document.getElementById('sheets-url').value =
+      'https://docs.google.com/spreadsheets/d/' + state.sheetId + '/edit';
+  }
+}
+
+function updateUserUI() {
+  const av = document.getElementById('user-avatar');
+  if (state.user.picture) {
+    av.innerHTML = `<img src="${state.user.picture}" alt="${state.user.name}" />`;
+  } else {
+    av.textContent = (state.user.name || 'D')[0].toUpperCase();
+  }
+  av.title = state.user.name + ' · ' + state.user.email;
+}
+
+function signOut() {
+  localStorage.removeItem('zdj_user');
+  state.user = null;
+  document.getElementById('app').style.display = 'none';
+  document.getElementById('auth-screen').style.display = 'flex';
+  if (typeof google !== 'undefined') google.accounts.id.disableAutoSelect();
+}
+
+/* ─── GOOGLE SHEETS LIVE DATA ─────────────────────────────────────────── */
+function saveSheetConfig() {
+  const url = document.getElementById('sheets-url').value.trim();
+  const match = url.match(/\/d\/([a-zA-Z0-9_-]+)/);
+  if (!match) {
+    document.getElementById('sheet-status').textContent = '⚠ Invalid Google Sheets URL.';
+    document.getElementById('sheet-status').style.color = '#FF3D00';
+    return;
+  }
+  state.sheetId = match[1];
+  localStorage.setItem('zdj_sheet_id', state.sheetId);
+  document.getElementById('sheet-status').textContent = '✅ Sheet ID saved. Click Refresh to load live data.';
+  document.getElementById('sheet-status').style.color = '#00C853';
+  document.getElementById('connect-banner').style.display = 'none';
+}
+
+async function loadSheetData() {
+  // Requires gapi loaded and user authenticated with Sheets scope.
+  // This is the integration hook — wire up when OAuth Client ID is set.
+  if (!state.sheetId) return;
+  try {
+    await gapi.client.init({ discoveryDocs: ['https://sheets.googleapis.com/$discovery/rest?version=v4'] });
+    // Example: read CC Tracker sheet
+    const resp = await gapi.client.sheets.spreadsheets.values.get({
+      spreadsheetId: state.sheetId,
+      range: '📋 CC TRACKER!B11:S500',
+    });
+    // Map rows → state.data.coveredCalls then re-render
+    console.log('Sheet data loaded', resp.result.values?.length, 'rows');
+    // TODO: parse and map rows to state.data structure, then renderAll()
+  } catch(e) {
+    console.warn('Sheet load failed:', e);
+  }
+}
+
+function refreshAll() {
+  if (state.sheetId) {
+    loadSheetData().then(() => renderAll());
+  } else {
+    renderAll();
+  }
+  document.getElementById('last-updated-label').textContent =
+    'Updated ' + new Date().toLocaleTimeString();
+}
+
+function setRefreshInterval() {
+  const secs = parseInt(document.getElementById('refresh-interval').value);
+  if (state.refreshTimer) clearInterval(state.refreshTimer);
+  if (secs > 0) state.refreshTimer = setInterval(refreshAll, secs * 1000);
+}
+function startAutoRefresh() {
+  setRefreshInterval(); // uses default value from select
+}
+
+/* ─── NAV ─────────────────────────────────────────────────────────────── */
+function switchTab(id, btn) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + id).classList.add('active');
+  btn.classList.add('active');
+}
+
+/* ─── FORMATTERS ──────────────────────────────────────────────────────── */
+const fmt$ = v => v == null ? '—' : '$' + (+v).toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
+const fmt$0 = v => v == null ? '—' : '$' + (+v).toLocaleString('en-US', {minimumFractionDigits:0, maximumFractionDigits:0});
+const fmtPct = v => v == null ? '—' : (v*100).toFixed(2) + '%';
+const fmtN = v => v == null ? '—' : (+v).toLocaleString();
+const fmtDate = v => v ? v.toString().slice(0,10) : '—';
+
+function pnlCell(val) {
+  if (val == null) return '<td class="text-right">—</td>';
+  const cls = val >= 0 ? 'pos' : 'neg';
+  const sign = val >= 0 ? '+' : '';
+  return `<td class="text-right ${cls}">${sign}${fmt$(val)}</td>`;
+}
+function pctCell(val) {
+  if (val == null) return '<td class="text-right">—</td>';
+  const cls = val >= 0 ? 'pos' : 'neg';
+  return `<td class="text-right ${cls}">${fmtPct(val)}</td>`;
+}
+function statusChip(s) {
+  const map = { Filled:'chip-green', Open:'chip-blue', Expired:'chip-gray', Assigned:'chip-orange' };
+  return `<span class="chip ${map[s]||'chip-gray'}">${s}</span>`;
+}
+function itmOtmChip(v) {
+  const map = { ITM:'chip-orange', OTM:'chip-blue' };
+  return v ? `<span class="chip ${map[v]||'chip-gray'}">${v}</span>` : '—';
+}
+
+/* ─── RENDER ALL ──────────────────────────────────────────────────────── */
+function renderAll() {
+  const d = state.data;
+  renderOverview(d);
+  renderCCTable();
+  renderEquities(d);
+  renderCrypto(d);
+  renderStaking(d);
+  renderBenchmarks(d);
+  renderCharts(d);
+}
+
+/* ── OVERVIEW ────────────────────────────────────────────────────────── */
+function renderOverview(d) {
+  const total = d.summary.coveredCallPnl + d.summary.equityPnl + d.summary.cryptoPnl;
+  const roi = total / d.summary.startingBalance;
+
+  const metrics = [
+    { label:'Total Portfolio P&L', value:fmt$(total), sub:'All layers combined', badge:`+${fmtPct(roi)}`, badgeCls:'badge-up', accent:'#FFD700' },
+    { label:'Covered Call P&L', value:fmt$(d.summary.coveredCallPnl), sub:'Premium + closings', badge:`${fmtPct(d.summary.coveredCallPnl/total)} of total`, badgeCls:'badge-neutral', accent:'#00B4D8' },
+    { label:'Equity P&L', value:fmt$(d.summary.equityPnl), sub:'Realized gains/losses', badge:`${fmtPct(d.summary.equityPnl/total)} of total`, badgeCls:'badge-neutral', accent:'#00C853' },
+    { label:'Crypto P&L', value:fmt$(d.summary.cryptoPnl), sub:'NEXO + on-chain', badge:`${fmtPct(d.summary.cryptoPnl/total)} of total`, badgeCls:'badge-neutral', accent:'#F7931A' },
+    { label:'Starting Balance', value:fmt$0(d.summary.startingBalance), sub:'Initial capital deployed', badge:'Feb 2024', badgeCls:'badge-neutral', accent:'#6B7280' },
+    { label:'Total CC Trades', value:d.summary.totalTrades.toLocaleString(), sub:'Covered call entries', badge:'2024–2026', badgeCls:'badge-neutral', accent:'#9B59B6' },
+    { label:'Portfolio ROI', value:fmtPct(roi), sub:'Return on starting capital', badge:'Since inception', badgeCls:'badge-up', accent:'#00C853' },
+    { label:'Next Benchmark', value:'$200,000', sub:'Level 4 target', badge:`Gap: ${fmt$0(200000-total)}`, badgeCls:'badge-orange', accent:'#FF6B35' },
+  ];
+
+  document.getElementById('overview-metrics').innerHTML = metrics.map(m => `
+    <div class="metric-card" style="--accent:${m.accent}">
+      <div class="metric-label">${m.label}</div>
+      <div class="metric-value">${m.value}</div>
+      <div class="metric-sub">${m.sub}</div>
+      <div class="metric-badge ${m.badgeCls}">${m.badge}</div>
+    </div>
+  `).join('');
+
+  // Overview CC table (first 10)
+  const rows = (d.coveredCalls || []).slice(0,10);
+  document.getElementById('cc-body-overview').innerHTML = rows.map(r => `
+    <tr>
+      <td><strong>${r.ticker}</strong></td>
+      <td>${fmtDate(r.tradeDate)}</td>
+      <td>${fmtDate(r.expDate)}</td>
+      <td class="text-right">${fmtN(r.contracts)}</td>
+      <td class="text-right">${fmt$(r.strike)}</td>
+      <td class="text-right">${fmt$(r.credit)}</td>
+      ${pnlCell(r.netPnl)}
+      ${pctCell(r.roi)}
+      <td class="text-center">${statusChip(r.status)}</td>
+      <td>${itmOtmChip(r.itmOtm)}</td>
+    </tr>
+  `).join('');
+}
+
+/* ── CC TABLE ────────────────────────────────────────────────────────── */
+function renderCCTable() {
+  const d = state.data;
+  if (!d) return;
+  const filter = document.getElementById('cc-filter-status')?.value || 'all';
+  const rows = (d.coveredCalls || []).filter(r => filter === 'all' || r.status === filter);
+
+  // CC tab metrics
+  const filled = d.coveredCalls.filter(r=>r.status==='Filled');
+  const wins = filled.filter(r=>r.netPnl>0);
+  const totalPrem = filled.reduce((a,r)=>a+(r.credit||0)*100*(r.contracts||0),0);
+  document.getElementById('cc-metrics').innerHTML = [
+    { label:'CC Trades Executed', value:filled.length, sub:'Filled trades', accent:'#00B4D8' },
+    { label:'Total CC P&L', value:fmt$(d.summary.coveredCallPnl), sub:'Realized', accent:'#00C853' },
+    { label:'Win Rate', value:fmtPct(wins.length/Math.max(1,filled.length)), sub:'Profitable trades', accent:'#FFD700' },
+    { label:'Total Premium', value:fmt$(totalPrem), sub:'Gross credits collected', accent:'#9B59B6' },
+    { label:'Open Positions', value:d.coveredCalls.filter(r=>r.status==='Open').length, sub:'Active CCs', accent:'#FF6B35' },
+  ].map(m=>`<div class="metric-card" style="--accent:${m.accent}">
+    <div class="metric-label">${m.label}</div>
+    <div class="metric-value">${typeof m.value==='number' && m.value<100 ? m.value : m.value}</div>
+    <div class="metric-sub">${m.sub}</div>
+  </div>`).join('');
+
+  document.getElementById('cc-full-body').innerHTML = rows.map((r,i) => `
+    <tr>
+      <td style="color:rgba(255,255,255,0.3)">${i+1}</td>
+      <td><strong>${r.ticker}</strong></td>
+      <td>${fmtDate(r.tradeDate)}</td>
+      <td>${fmtDate(r.expDate)}</td>
+      <td class="text-right">${fmtN(r.shares)}</td>
+      <td class="text-right">${fmt$(r.costPerShare)}</td>
+      <td class="text-right">${fmtN(r.contracts)}</td>
+      <td class="text-right">${fmt$(r.strike)}</td>
+      <td class="text-right">${fmt$(r.credit)}</td>
+      <td class="text-right">${r.debit ? fmt$(r.debit) : '—'}</td>
+      ${pnlCell(r.netPnl)}
+      ${pctCell(r.roi)}
+      <td class="text-center">${statusChip(r.status)}</td>
+      <td class="text-center">${r.assigned || '—'}</td>
+      <td>${itmOtmChip(r.itmOtm)}</td>
+    </tr>
+  `).join('');
+}
+
+/* ── EQUITIES ────────────────────────────────────────────────────────── */
+function renderEquities(d) {
+  document.getElementById('eq-metrics').innerHTML = [
+    { label:'Equity P&L (2026 YTD)', value:fmt$(d.summary.equityPnl), accent:'#00C853' },
+    { label:'EOY 2025 P&L', value:fmt$(45970.38), accent:'#00B4D8' },
+    { label:'EOY 2025 Return', value:'38.36%', accent:'#FFD700' },
+    { label:'Active Tickers', value:'CLSK · MVIS · MTTR · EVGO', accent:'#9B59B6' },
+  ].map(m=>`<div class="metric-card" style="--accent:${m.accent}">
+    <div class="metric-label">${m.label}</div>
+    <div class="metric-value" style="font-size:${m.value.length>10?'1.1rem':'1.7rem'}">${m.value}</div>
+  </div>`).join('');
+
+  document.getElementById('eq-body').innerHTML = d.equities.map((r,i) => `
+    <tr>
+      <td style="color:rgba(255,255,255,0.3)">${r.trx}</td>
+      <td><strong>${r.ticker}</strong></td>
+      <td><span class="chip ${r.type==='CC'?'chip-blue':'chip-green'}">${r.type}</span></td>
+      <td>${fmtDate(r.entryDate)}</td>
+      <td class="text-right">${r.qty ? fmtN(r.qty) : '—'}</td>
+      <td class="text-right">${fmt$(r.entryPrice)}</td>
+      <td>${fmtDate(r.exitDate)}</td>
+      <td class="text-right">${r.exitQty ? fmtN(r.exitQty) : '—'}</td>
+      <td class="text-right">${fmt$(r.exitPrice)}</td>
+      ${pnlCell(r.pnlPerShare)}
+      ${pnlCell(r.totalPnl)}
+    </tr>
+  `).join('');
+}
+
+/* ── CRYPTO ──────────────────────────────────────────────────────────── */
+function renderCrypto(d) {
+  document.getElementById('crypto-metrics').innerHTML = [
+    { label:'Crypto Net Profit', value:fmt$(d.summary.cryptoPnl), sub:'NEXO platform', accent:'#F7931A' },
+    { label:'Starting Balance', value:fmt$(10878.54), sub:'Feb 2024', accent:'#00B4D8' },
+    { label:'Total Contributions', value:fmt$(5000), sub:'Added capital', accent:'#00C853' },
+    { label:'Total Distributions', value:fmt$(10808.75), sub:'Withdrawn', accent:'#9B59B6' },
+    { label:'% Return on Capital', value:'262.84%', sub:'On contributions', accent:'#FFD700' },
+  ].map(m=>`<div class="metric-card" style="--accent:${m.accent}">
+    <div class="metric-label">${m.label}</div>
+    <div class="metric-value">${m.value}</div>
+    ${m.sub ? `<div class="metric-sub">${m.sub}</div>` : ''}
+  </div>`).join('');
+
+  document.getElementById('crypto-body').innerHTML = d.crypto.map(r => `
+    <tr>
+      <td><strong>${r.token}</strong></td>
+      <td><span class="chip chip-blue">${r.type}</span></td>
+      <td>${fmtDate(r.date)}</td>
+      <td class="text-right">${r.qty.toFixed(4)}</td>
+      <td class="text-right">${fmt$(r.usdIn)}</td>
+      <td class="text-right">${fmt$(r.usdOut)}</td>
+      ${pnlCell(r.pnl)}
+      ${pctCell(r.pct)}
+      <td>NEXO</td>
+    </tr>
+  `).join('');
+}
+
+/* ── STAKING ─────────────────────────────────────────────────────────── */
+function renderStaking(d) {
+  document.getElementById('staking-metrics').innerHTML = [
+    { label:'Starting Staking Balance', value:fmt$(2453.94), accent:'#9B59B6' },
+    { label:'Active Positions', value:d.staking.length, accent:'#00B4D8' },
+    { label:'Tokens Staked', value:'ATOM · DOT', accent:'#FFD700' },
+  ].map(m=>`<div class="metric-card" style="--accent:${m.accent}">
+    <div class="metric-label">${m.label}</div>
+    <div class="metric-value" style="font-size:${typeof m.value==='string'&&m.value.length>8?'1.2rem':'1.7rem'}">${m.value}</div>
+  </div>`).join('');
+
+  document.getElementById('staking-body').innerHTML = d.staking.map(r => `
+    <tr>
+      <td><strong>${r.token}</strong></td>
+      <td class="text-right">${r.qty.toLocaleString()}</td>
+      <td class="text-right">${r.period}</td>
+      <td class="text-right">${fmt$(r.usdDeposit)}</td>
+      <td>${fmtDate(r.bonded)}</td>
+      <td><span class="chip chip-gold">${r.apy}</span></td>
+      <td>${fmtDate(r.unbonded)}</td>
+      <td class="text-right">${r.qtyW ? r.qtyW.toLocaleString() : '—'}</td>
+      <td class="text-right">—</td>
+      <td class="text-right">—</td>
+    </tr>
+  `).join('');
+}
+
+/* ── BENCHMARKS ──────────────────────────────────────────────────────── */
+function renderBenchmarks(d) {
+  const total = d.summary.coveredCallPnl + d.summary.equityPnl + d.summary.cryptoPnl;
+
+  document.getElementById('bm-totals').innerHTML = [
+    { label:'Covered Calls P&L', value:fmt$(d.summary.coveredCallPnl), accent:'#00B4D8', badge:'Layer 1' },
+    { label:'Equity P&L', value:fmt$(d.summary.equityPnl), accent:'#00C853', badge:'Layer 2' },
+    { label:'Crypto P&L', value:fmt$(d.summary.cryptoPnl), accent:'#F7931A', badge:'Layer 3' },
+    { label:'TOTAL PERFORMANCE', value:fmt$(total), accent:'#FFD700', badge:`+${fmtPct(total/d.summary.startingBalance)} ROI` },
+  ].map(m=>`<div class="metric-card" style="--accent:${m.accent}">
+    <div class="metric-label">${m.label}</div>
+    <div class="metric-value">${m.value}</div>
+    <div class="metric-badge badge-neutral">${m.badge}</div>
+  </div>`).join('');
+
+  document.getElementById('benchmark-cards').innerHTML = d.benchmarks.map(b => {
+    const pct = Math.min(1, total / b.target);
+    const hit = total >= b.target;
+    const fillCls = hit ? 'fill-green' : pct > 0.5 ? 'fill-teal' : 'fill-orange';
+    return `
+      <div class="bm-card">
+        <div class="bm-level">Level ${b.level}</div>
+        <div class="bm-target" style="color:${hit?'var(--green)':'var(--white)'}">${fmt$0(b.target)}</div>
+        <div class="progress-bar"><div class="progress-fill ${fillCls}" style="width:${(pct*100).toFixed(1)}%"></div></div>
+        <div class="bm-pct">${(pct*100).toFixed(1)}% complete</div>
+        ${hit ? '<div class="bm-hit-badge">✅ HIT</div>' : ''}
+      </div>`;
+  }).join('');
+
+  document.getElementById('benchmark-body').innerHTML = d.benchmarks.map(b => {
+    const hit = total >= b.target;
+    return `<tr>
+      <td>Level ${b.level}</td>
+      <td class="text-right">${fmt$0(b.target)}</td>
+      <td class="text-center">${hit ? '<span class="chip chip-green">✅ Hit</span>' : '<span class="chip chip-gray">⬜ Not Yet</span>'}</td>
+      <td class="text-right">${b.zack ? fmt$0(b.zack) : '—'}</td>
+      <td class="text-right">${b.chris ? fmt$0(b.chris) : '—'}</td>
+    </tr>`;
+  }).join('');
+}
+
+/* ── CHARTS ──────────────────────────────────────────────────────────── */
+let charts = {};
+function renderCharts(d) {
+  const chartDefaults = {
+    color: 'rgba(255,255,255,0.7)',
+    grid: { color: 'rgba(255,255,255,0.06)' },
+    ticks: { color: 'rgba(255,255,255,0.4)' },
+  };
+
+  // Destroy existing
+  Object.values(charts).forEach(c => c.destroy());
+  charts = {};
+
+  // ── P&L by Layer
+  charts.layers = new Chart(document.getElementById('chart-layers'), {
+    type: 'bar',
+    data: {
+      labels: ['Covered Calls', 'Equities', 'Crypto'],
+      datasets: [{
+        label: 'Realized P&L ($)',
+        data: [d.summary.coveredCallPnl, d.summary.equityPnl, d.summary.cryptoPnl],
+        backgroundColor: ['rgba(0,180,216,0.75)', 'rgba(0,200,83,0.75)', 'rgba(247,147,26,0.75)'],
+        borderColor: ['#00B4D8','#00C853','#F7931A'],
+        borderWidth: 1.5,
+        borderRadius: 6,
+      }]
+    },
+    options: {
+      responsive:true, maintainAspectRatio:true,
+      plugins: { legend:{ display:false } },
+      scales: {
+        x: { grid:chartDefaults.grid, ticks:chartDefaults.ticks },
+        y: { grid:chartDefaults.grid, ticks:{ ...chartDefaults.ticks, callback: v => '$'+v.toLocaleString() } }
+      }
+    }
+  });
+
+  // ── Allocation Donut
+  charts.alloc = new Chart(document.getElementById('chart-allocation'), {
+    type: 'doughnut',
+    data: {
+      labels: ['Equities / CC', 'Crypto', 'Cash'],
+      datasets: [{
+        data: [93225, 5000, 4775],
+        backgroundColor: ['rgba(0,180,216,0.8)', 'rgba(247,147,26,0.8)', 'rgba(107,114,128,0.8)'],
+        borderColor: '#0F2440',
+        borderWidth: 3,
+        hoverOffset: 8,
+      }]
+    },
+    options: {
+      responsive:true, maintainAspectRatio:true,
+      plugins: {
+        legend: { position:'bottom', labels:{ color:'rgba(255,255,255,0.6)', boxWidth:12, padding:12 } },
+        tooltip: { callbacks: { label: ctx => ' ' + ctx.label + ': $' + ctx.parsed.toLocaleString() } }
+      }
+    }
+  });
+
+  // ── Monthly CC Premium Line
+  charts.monthly = new Chart(document.getElementById('chart-monthly'), {
+    type: 'line',
+    data: {
+      labels: d.monthly.map(m=>m.month),
+      datasets: [{
+        label: 'Premium ($)',
+        data: d.monthly.map(m=>m.premium),
+        borderColor: '#00B4D8',
+        backgroundColor: 'rgba(0,180,216,0.12)',
+        borderWidth: 2,
+        fill: true,
+        tension: 0.4,
+        pointRadius: 3,
+        pointBackgroundColor: '#00B4D8',
+      }]
+    },
+    options: {
+      responsive:true, maintainAspectRatio:true,
+      plugins: { legend:{ display:false } },
+      scales: {
+        x: { grid:chartDefaults.grid, ticks:{ ...chartDefaults.ticks, maxRotation:45 } },
+        y: { grid:chartDefaults.grid, ticks:{ ...chartDefaults.ticks, callback: v=>'$'+v.toLocaleString() } }
+      }
+    }
+  });
+
+  // Crypto charts
+  if (document.getElementById('chart-crypto-pnl')) {
+    const cryptoPnls = d.crypto.filter(r=>r.pnl!=null);
+    charts.cryptoPnl = new Chart(document.getElementById('chart-crypto-pnl'), {
+      type: 'bar',
+      data: {
+        labels: cryptoPnls.map(r=>r.token + ' ' + r.type),
+        datasets: [{ label:'P&L', data: cryptoPnls.map(r=>r.pnl),
+          backgroundColor: cryptoPnls.map(r=>r.pnl>=0?'rgba(0,200,83,0.75)':'rgba(255,61,0,0.75)'),
+          borderRadius:6 }]
+      },
+      options: { responsive:true, maintainAspectRatio:true,
+        plugins:{ legend:{display:false} },
+        scales:{ x:{grid:chartDefaults.grid,ticks:chartDefaults.ticks},
+                 y:{grid:chartDefaults.grid,ticks:{...chartDefaults.ticks,callback:v=>'$'+v}} } }
+    });
+    charts.cryptoAlloc = new Chart(document.getElementById('chart-crypto-alloc'), {
+      type: 'doughnut',
+      data: {
+        labels: ['BTC','ETH','BNB','NEXO'],
+        datasets: [{ data:[10878.54,5000,3000,100],
+          backgroundColor:['#F7931A','#627EEA','#F3BA2F','#1B65D6'].map(c=>c+'CC'),
+          borderColor:'#0F2440', borderWidth:3 }]
+      },
+      options: { responsive:true, maintainAspectRatio:true,
+        plugins:{legend:{position:'bottom',labels:{color:'rgba(255,255,255,0.6)',boxWidth:12,padding:10}}} }
+    });
+  }
+}
+
+/* ── EXPORT CSV ──────────────────────────────────────────────────────── */
+function exportCSV(type='cc') {
+  const d = state.data;
+  let rows, filename;
+  if (type === 'cc') {
+    filename = 'ZDJ_CoveredCalls.csv';
+    const hdr = ['Ticker','TradeDate','ExpDate','Shares','CostPerShare','Contracts','Strike','Credit','Debit','NetPnl','ROI','Status','Assigned','ITM/OTM'];
+    rows = [hdr, ...d.coveredCalls.map(r=>[r.ticker,r.tradeDate,r.expDate,r.shares,r.costPerShare,r.contracts,r.strike,r.credit,r.debit,r.netPnl,r.roi,r.status,r.assigned,r.itmOtm])];
+  }
+  const csv = rows.map(r=>r.map(v=>v==null?'':String(v).replace(/,/g,';')).join(',')).join('\n');
+  const a = Object.assign(document.createElement('a'), { href:'data:text/csv;charset=utf-8,'+encodeURIComponent(csv), download:filename });
+  a.click();
+}
+</
