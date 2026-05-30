@@ -941,16 +941,16 @@ let state = {
 /* ─── DEMO DATA ───────────────────────────────────────────────────── */
 const DEMO = {
   summary: {
-    coveredCallPnl: 2899.00,
-    equityPnl:      4079.00,
+    coveredCallPnl: 78045.40,
+    equityPnl:      58907.04,
     cryptoPnl:      13142.11,
-    totalPnl:       20120.11,
+    totalPnl:       150094.55,
     startingBalance:98000,
-    currentBalance: 118120.11,
-    totalTrades:    50,
-    winRate:        0.96,
-    avgROI:         0.0629,
-    monthlyAvg:     13413.41,
+    currentBalance: 248094.55,
+    totalTrades:    165,
+    winRate:        0.74,
+    avgROI:         0.312,
+    monthlyAvg:     12507.88,
   },
   coveredCalls: [
     /* ── Real v2 trades only (Apr–May 2026) ── */
@@ -1066,17 +1066,17 @@ const DEMO = {
     { token:'Polkadot (DOT)',   qty:535.79, period:'Flexible',  usdDeposit:4012.27, bonded:'2024-02-28', apy:'~12%', unbonded:'', qtyW:null },
     { token:'Cosmos (ATOM)',    qty:143.00, period:'~21 days',  usdDeposit:832.26,  bonded:'2024-11-17', apy:'~10%', unbonded:'', qtyW:null },
   ],
-    benchmarks: [
-    { level:1,  label:'$50K',   target:50000,   ccShare:0.40, equityShare:0.35, cryptoShare:0.25, zackPct:0.50, chrisPct:0.50, hit: true  },
-    { level:2,  label:'$75K',   target:75000,   ccShare:0.40, equityShare:0.35, cryptoShare:0.25, zackPct:0.55, chrisPct:0.45, hit: true  },
-    { level:3,  label:'$100K',  target:100000,  ccShare:0.40, equityShare:0.35, cryptoShare:0.25, zackPct:0.60, chrisPct:0.40, hit: true  },
-    { level:4,  label:'$125K',  target:125000,  ccShare:0.40, equityShare:0.35, cryptoShare:0.25, zackPct:0.65, chrisPct:0.35, hit: true  },
-    { level:5,  label:'$150K',  target:150000,  ccShare:0.40, equityShare:0.35, cryptoShare:0.25, zackPct:0.70, chrisPct:0.30, hit: true  },
-    { level:6,  label:'$200K',  target:200000,  ccShare:0.42, equityShare:0.35, cryptoShare:0.23, zackPct:0.72, chrisPct:0.28, hit: false },
-    { level:7,  label:'$250K',  target:250000,  ccShare:0.42, equityShare:0.35, cryptoShare:0.23, zackPct:0.74, chrisPct:0.26, hit: false },
-    { level:8,  label:'$300K',  target:300000,  ccShare:0.45, equityShare:0.35, cryptoShare:0.20, zackPct:0.75, chrisPct:0.25, hit: false },
-    { level:9,  label:'$400K',  target:400000,  ccShare:0.45, equityShare:0.35, cryptoShare:0.20, zackPct:0.78, chrisPct:0.22, hit: false },
-    { level:10, label:'$500K',  target:500000,  ccShare:0.50, equityShare:0.30, cryptoShare:0.20, zackPct:0.80, chrisPct:0.20, hit: false },
+  benchmarks: [
+    { level:1,  label:'$50K',   target:50000,   zack:5000,  chris:12500, zackPct:0.286, chrisPct:0.714 },
+    { level:2,  label:'$100K',  target:100000,  zack:2500,  chris:2500,  zackPct:0.50,  chrisPct:0.50  },
+    { level:3,  label:'$150K',  target:150000,  zack:5000,  chris:0,     zackPct:1.00,  chrisPct:0.00  },
+    { level:4,  label:'$200K',  target:200000,  zack:0,     chris:0,     zackPct:0.50,  chrisPct:0.50  },
+    { level:5,  label:'$250K',  target:250000,  zack:0,     chris:0,     zackPct:0.50,  chrisPct:0.50  },
+    { level:6,  label:'$300K',  target:300000,  zack:0,     chris:0,     zackPct:0.50,  chrisPct:0.50  },
+    { level:7,  label:'$350K',  target:350000,  zack:0,     chris:0,     zackPct:0.50,  chrisPct:0.50  },
+    { level:8,  label:'$400K',  target:400000,  zack:0,     chris:0,     zackPct:0.50,  chrisPct:0.50  },
+    { level:9,  label:'$450K',  target:450000,  zack:0,     chris:0,     zackPct:0.50,  chrisPct:0.50  },
+    { level:10, label:'$500K',  target:500000,  zack:0,     chris:0,     zackPct:0.50,  chrisPct:0.50  },
   ],
   monthly: [
     { month:'Jan 2026', cc:3850.00, equity:8420.00, crypto:1280.00, total:13550.00 },
